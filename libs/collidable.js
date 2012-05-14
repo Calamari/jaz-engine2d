@@ -5,24 +5,25 @@ var Collidable = function() {
   this.collisionType = 'none'
 };
 
+Collidable.prototype.isHit = function() {};
+
 Collidable.Rectangle = function(config) {
   config = config || {};
   this.collisionType = 'rectangle';
   this.position = config.position || new Vector();
   this.width = config.width || 0;
   this.height = config.height || 0;
-
-  this.isHit = function() {};
 };
+
+Collidable.Rectangle.prototype = Collidable.prototype;
 
 Collidable.Circle = function(config) {
   config = config || {};
   this.collisionType = 'circle';
   this.position = config.position || new Vector();
   this.radius = config.radius || 0;
-
-  this.isHit = function() {};
 };
+Collidable.Circle.prototype = Collidable.prototype;
 
 Collidable.Polygon = function(config) {
   config = config || {};
@@ -31,9 +32,9 @@ Collidable.Polygon = function(config) {
   this.points = config.points || [];
   this.width = 0;
   this.height = 0;
-
-  this.isHit = function() {};
 };
+
+Collidable.Polygon.prototype = Collidable.prototype;
 
 Collidable.Polygon.prototype.calculateBox = function() {
   var points = this.points,
