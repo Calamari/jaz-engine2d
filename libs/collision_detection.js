@@ -66,9 +66,20 @@ CollisionDetection.prototype.test = function() {
         }
       }
       if (isHit) {
+        obj1.isHit = true;
         obj1.emit('hit', obj2);
+        obj2.isHit = true;
         obj2.emit('hit', obj1);
         this.collisions.push([obj1, obj2]);
+      } else {
+        if (obj1.isHit) { // if it was hit
+          obj1.isHit = false;
+          obj1.emit('leaveHit');
+        }
+        if (obj2.isHit) { // if it was hit
+          obj2.isHit = false;
+          obj2.emit('leaveHit');
+        }
       }
     }
   }

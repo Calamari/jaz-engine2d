@@ -241,4 +241,52 @@ describe(CollisionDetection, function() {
     done();
   });
 
+  it('saves isHit flag on every hit object', function(done) {
+    var hitCircle1 = getCircle(0,0, 3),
+        hitCircle2 = getCircle(4,0, 3),
+        notHitCircle = getCircle(14,0, 3);
+
+    var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
+    detector.test();
+    expect(hitCircle1.isHit).toBe(true);
+    expect(hitCircle2.isHit).toBe(true);
+    expect(notHitCircle.isHit).not.toBe(true);
+    done();
+  });
+
+  it('emits leaveHit event on every object leaving hit modus', function(done) {
+    var hitCircle1 = getCircle(0,0, 3),
+        hitCircle2 = getCircle(4,0, 3),
+        notHitCircle = getCircle(14,0, 3),
+        count = 0;
+
+    var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
+    detector.test();
+
+    hitCircle2.position.x = 100;
+    hitCircle1.on('leaveHit', function(obj) { ++count; });
+    hitCircle2.on('leaveHit', function(obj) { ++count; });
+    notHitCircle.on('leaveHit', function(obj) { expect(true).toBe(false); });
+
+    detector.test();
+    expect(count).toBe(2);
+    done();
+  });
+
+  it('removes isHit flag on every object leaving hit modus', function(done) {
+    var hitCircle1 = getCircle(0,0, 3),
+        hitCircle2 = getCircle(4,0, 3),
+        notHitCircle = getCircle(14,0, 3);
+
+    var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
+    detector.test();
+
+    hitCircle2.position.x = 100;
+    detector.test();
+    expect(hitCircle1.isHit).not.toBe(true);
+    expect(hitCircle2.isHit).not.toBe(true);
+    expect(notHitCircle.isHit).not.toBe(true);
+    done();
+  });
+
 });
