@@ -118,11 +118,11 @@ describe(Collidable, function() {
       done();
     });
 
-    describe('#calculateBox', function() {
+    describe('#calculateBoundingBox', function() {
       var obj;
       beforeEach(function() {
         obj = new Collidable.Polygon({ points: [ new Vector(3,3), new Vector(2,3), new Vector(2,1) ] });
-        obj.calculateBox();
+        obj.calculateBoundingBox();
       });
 
       it("can calculate width and height", function(done) {

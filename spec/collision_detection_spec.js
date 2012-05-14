@@ -22,7 +22,7 @@ var getPolygon = function() {
   var poly = new Collidable.Polygon({
     points: [].slice.call(arguments)
   });
-  poly.calculateBox();
+  poly.calculateBoundingBox();
   return poly;
 };
 

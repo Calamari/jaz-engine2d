@@ -36,7 +36,7 @@ Collidable.Polygon = function(config) {
 
 Collidable.Polygon.prototype = Collidable.prototype;
 
-Collidable.Polygon.prototype.calculateBox = function() {
+Collidable.Polygon.prototype.calculateBoundingBox = function() {
   var points = this.points,
       minX = points[0].x,
       minY = points[0].y,
