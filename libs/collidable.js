@@ -1,11 +1,12 @@
 
 var Vector = Vector || require(__dirname + '/vector');
+var EventEmitter = EventEmitter || require('events').EventEmitter;
 
 var Collidable = function() {
   this.collisionType = 'none'
 };
 
-Collidable.prototype.isHit = function() {};
+Collidable.prototype = new EventEmitter;
 
 Collidable.Rectangle = function(config) {
   config = config || {};
@@ -15,7 +16,7 @@ Collidable.Rectangle = function(config) {
   this.height = config.height || 0;
 };
 
-Collidable.Rectangle.prototype = Collidable.prototype;
+Collidable.Rectangle.prototype = new Collidable;
 
 Collidable.Circle = function(config) {
   config = config || {};
@@ -23,7 +24,7 @@ Collidable.Circle = function(config) {
   this.position = config.position || new Vector();
   this.radius = config.radius || 0;
 };
-Collidable.Circle.prototype = Collidable.prototype;
+Collidable.Circle.prototype = new Collidable;
 
 Collidable.Polygon = function(config) {
   config = config || {};
@@ -34,7 +35,7 @@ Collidable.Polygon = function(config) {
   this.height = 0;
 };
 
-Collidable.Polygon.prototype = Collidable.prototype;
+Collidable.Polygon.prototype = new Collidable;
 
 Collidable.Polygon.prototype.calculateBoundingBox = function() {
   var points = this.points,

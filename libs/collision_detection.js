@@ -66,8 +66,8 @@ CollisionDetection.prototype.test = function() {
         }
       }
       if (isHit) {
-        obj1.isHit && obj1.isHit(obj2);
-        obj2.isHit && obj2.isHit(obj1);
+        obj1.emit('hit', obj2);
+        obj2.emit('hit', obj1);
         this.collisions.push([obj1, obj2]);
       }
     }

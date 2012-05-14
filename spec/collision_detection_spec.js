@@ -226,18 +226,18 @@ describe(CollisionDetection, function() {
     });
   });
 
-  it('calls isHit method on every hit object', function(done) {
+  it('emits hit event on every hit object', function(done) {
     var hitCircle1 = getCircle(0,0, 3),
         hitCircle2 = getCircle(4,0, 3),
-        notHitCircle = getCircle(14,0, 3);
-    spyOn(hitCircle1, 'isHit');
-    spyOn(hitCircle2, 'isHit');
-    spyOn(notHitCircle, 'isHit');
+        notHitCircle = getCircle(14,0, 3),
+        count = 0;
+
+    hitCircle1.on('hit', function(obj) { expect(obj).toBe(hitCircle2); ++count; });
+    hitCircle2.on('hit', function(obj) { expect(obj).toBe(hitCircle1); ++count; });
+    notHitCircle.on('hit', function(obj) { expect(true).toBe(false); });
     var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
     detector.test();
-    expect(hitCircle1.isHit).toHaveBeenCalledWith(hitCircle2);
-    expect(hitCircle2.isHit).toHaveBeenCalledWith(hitCircle1);
-    expect(notHitCircle.isHit).not.toHaveBeenCalled();
+    expect(count).toBe(2);
     done();
   });
 
