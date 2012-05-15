@@ -62,7 +62,7 @@ CollisionDetection.prototype.test = function() {
              && (p1.x + obj1.width >= p2.x)
              && (p1.x <= p2.x + obj2.width);
         if (isHit && isPolygonCheck) {
-
+          isHit = this._checkPolygonCollision(obj1, obj2);
         }
       }
       if (isHit) {
@@ -83,6 +83,36 @@ CollisionDetection.prototype.test = function() {
       }
     }
   }
+};
+
+CollisionDetection.prototype._checkPolygonCollision = function(obj1, obj2) {
+  var points1 = obj1.points,
+      points2 = obj2.points,
+      axis, i, l, projection1, projection2;
+
+  for (i = 0, l=points1.length; i<l; ++i) {
+    axis = points1[i].clone().sub(points1[(i == points1.length-1 ? 0 : (i+1))]).rightNormal();
+    projection1 = obj1.project(axis);
+    projection2 = obj2.project(axis);
+    if (!this._doProjectionsOverlap(projection1, projection2)) {
+      return false;
+    }
+  }
+
+  for (i = points2.length; i--; ) {
+    axis = points2[i].clone().sub(points2[(i == points2.length-1 ? 0 : (i+1))]).rightNormal();
+    projection1 = obj1.project(axis);
+    projection2 = obj2.project(axis);
+    if (!this._doProjectionsOverlap(projection1, projection2)) {
+      return false;
+    }
+  }
+  return true;
+};
+
+CollisionDetection.prototype._doProjectionsOverlap = function(projection1, projection2) {
+  return (projection1[0] <= projection2[1] && projection1[1] >= projection2[0])
+      || (projection2[0] <= projection1[1] && projection2[1] >= projection1[0]);
 };
 
 CollisionDetection.prototype.getCollisions = function() {

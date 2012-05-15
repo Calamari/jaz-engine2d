@@ -215,7 +215,7 @@ describe(CollisionDetection, function() {
       done();
     });
 
-    xit("finds no collisions if polygons only intersect in bounding box", function(done) {
+    it("can find no collisions if polygons only intersect in bounding box", function(done) {
       var detector = new CollisionDetection(
         getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
         getPolygon(new Vector(3,0), new Vector(3,2), new Vector(2,0))
@@ -224,6 +224,93 @@ describe(CollisionDetection, function() {
       expect(detector.getCollisions().length).toEqual(0);
       done();
     });
+
+    it("can find collisions if polygons although they have offset", function(done) {
+      var detector = new CollisionDetection(
+        getPolygon(new Vector(3,1), new Vector(3,3), new Vector(1,3)),
+        getPolygon(new Vector(2,0), new Vector(4,0), new Vector(3,2))
+      );
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(1);
+      done();
+    });
+
+    it("can find no collisions if polygons although they have offset", function(done) {
+      var detector = new CollisionDetection(
+        getPolygon(new Vector(2,1), new Vector(3,3), new Vector(1,3)),
+        getPolygon(new Vector(2,0), new Vector(4,0), new Vector(3,2))
+      );
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(0);
+      done();
+    });
+
+    it("can find collisions if polygons have a position and offset", function(done) {
+      var polygon2 = getPolygon(new Vector(0,0), new Vector(2,0), new Vector(1,2));
+      polygon2.position.x = 2;
+      var detector = new CollisionDetection(
+        getPolygon(new Vector(3,1), new Vector(3,3), new Vector(1,3)),
+        polygon2
+      );
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(1);
+      done();
+    });
+
+    it("can find collisions if polygons have a position but no offset", function(done) {
+      var polygon1 = getPolygon(new Vector(2,0), new Vector(2,2), new Vector(0,2)),
+          polygon2 = getPolygon(new Vector(0,0), new Vector(2,0), new Vector(1,2));
+      polygon1.position.x = 2;
+      polygon2.position.x = 2;
+      var detector = new CollisionDetection(polygon1, polygon2);
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(1);
+      done();
+    });
+
+    it("can find collisions if polygons have a  different position but no offset", function(done) {
+      var polygon1 = getPolygon(new Vector(2,0), new Vector(2,2), new Vector(0,2)),
+          polygon2 = getPolygon(new Vector(0,0), new Vector(2,0), new Vector(1,2));
+      polygon1.position.x = 2;
+      polygon2.position.x = 3;
+      var detector = new CollisionDetection(polygon1, polygon2);
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(1);
+      done();
+    });
+
+    it("does also find a collisions if polygons are touching with a penetration of 0", function(done) {
+      var polygon1 = getPolygon(new Vector(2,0), new Vector(2,2), new Vector(0,2)),
+          polygon2 = getPolygon(new Vector(0,0), new Vector(2,0), new Vector(1,2));
+      polygon1.position.x = 3;
+      polygon2.position.x = 2;
+      var detector = new CollisionDetection(polygon1, polygon2);
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(1);
+      done();
+    });
+
+    it("can find no collisions if polygons have a position and offset", function(done) {
+      var detector = new CollisionDetection(
+        getPolygon(new Vector(2,1), new Vector(3,3), new Vector(1,3)),
+        getPolygon(new Vector(2,0), new Vector(4,0), new Vector(3,2))
+      );
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(0);
+      done();
+    });
+
+    it("finds collisions of two pairs of objects ", function(done) {
+      var detector = new CollisionDetection(
+        getRect(10,0, 13,3), getRect(12,2, 14,4),
+        getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+        getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0))
+      );
+      detector.test();
+      expect(detector.getCollisions().length).toEqual(2);
+      done();
+    });
+
   });
 
   it('emits hit event on every hit object', function(done) {
@@ -286,6 +373,29 @@ describe(CollisionDetection, function() {
     expect(hitCircle1.isHit).not.toBe(true);
     expect(hitCircle2.isHit).not.toBe(true);
     expect(notHitCircle.isHit).not.toBe(true);
+    done();
+  });
+
+  it("saves isHit flat on polygons", function(done) {
+    var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+        polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
+        detector = new CollisionDetection(polygon1, polygon2);
+    detector.test();
+    expect(polygon1.isHit).toBe(true);
+    expect(polygon2.isHit).toBe(true);
+    done();
+  });
+
+  it("emits hit event on polygons", function(done) {
+    var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+        polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
+        detector = new CollisionDetection(polygon1, polygon2),
+        count = 0;
+
+    polygon1.on('hit', function(obj) { expect(obj).toBe(polygon2); ++count; });
+    polygon2.on('hit', function(obj) { expect(obj).toBe(polygon1); ++count; });
+    detector.test();
+    expect(count).toBe(2);
     done();
   });
 
