@@ -38,6 +38,25 @@ Collidable.Polygon = function(config) {
 
 Collidable.Polygon.prototype = new Collidable;
 
+/**
+ * Projection projects edge against vector we give in to it
+ * Makes sense to project against a normal of some other edge or so
+ */
+Collidable.Polygon.prototype.project = function(axis) {
+  var min = axis.dotProduct(this.position.clone().add(this.points[0])),
+      max = min,
+      i   = this.points.length,
+      proj;
+
+  while (--i) {
+    proj = axis.dotProduct(this.position.clone().add(this.points[i]));
+    // Test performance of this against like: if (proj < min) min=proj else if (proj > max) max = proj
+    min = Math.min(min, proj);
+    max = Math.max(max, proj);
+  }
+  return [min, max];
+};
+
 Collidable.Polygon.prototype.calculateBoundingBox = function() {
   if (this.points.length) {
     var points = this.points,
