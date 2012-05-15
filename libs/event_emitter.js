@@ -1,3 +1,5 @@
+if (typeof process === 'undefined') { var process = {}; }
+if (typeof exports === 'undefined') { var exports = {}; }
 /**
  * Taken from https://github.com/substack/node-browserify
  */
