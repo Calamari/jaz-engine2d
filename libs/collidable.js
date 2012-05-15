@@ -33,26 +33,33 @@ Collidable.Polygon = function(config) {
   this.points = config.points || [];
   this.width = 0;
   this.height = 0;
+  this.calculateBoundingBox();
 };
 
 Collidable.Polygon.prototype = new Collidable;
 
 Collidable.Polygon.prototype.calculateBoundingBox = function() {
-  var points = this.points,
-      minX = points[0].x,
-      minY = points[0].y,
-      maxX = points[0].x,
-      maxY = points[0].y;
-  for (var i=points.length;i--;) {
-    minX = Math.min(minX, points[i].x);
-    minY = Math.min(minY, points[i].y);
-    maxX = Math.max(maxX, points[i].x);
-    maxY = Math.max(maxY, points[i].y);
+  if (this.points.length) {
+    var points = this.points,
+        minX = points[0].x,
+        minY = points[0].y,
+        maxX = points[0].x,
+        maxY = points[0].y;
+    for (var i=points.length;i--;) {
+      minX = Math.min(minX, points[i].x);
+      minY = Math.min(minY, points[i].y);
+      maxX = Math.max(maxX, points[i].x);
+      maxY = Math.max(maxY, points[i].y);
+    }
+    this.width = maxX - minX;
+    this.height = maxY - minY;
+    // if the box does not begin with 0,0 coordinates
+    this.offset = new Vector(minX, minY);
+  } else {
+    this.width = 0;
+    this.height = 0;
+    this.offset = new Vector();
   }
-  this.width = maxX - minX;
-  this.height = maxY - minY;
-  // if the box does not begin with 0,0 coordinates
-  this.offset = new Vector(minX, minY);
 };
 
 if (typeof module !== 'undefined') {
