@@ -331,6 +331,22 @@ describe(CollisionDetection, function() {
     done();
   });
 
+  it('emits hit event only once on first hitting an object', function(done) {
+    var hitCircle1 = getCircle(0,0, 3),
+        hitCircle2 = getCircle(4,0, 3),
+        notHitCircle = getCircle(14,0, 3),
+        count = 0;
+
+    hitCircle1.on('hit', function(obj) { expect(obj).toBe(hitCircle2); ++count; });
+    hitCircle2.on('hit', function(obj) { expect(obj).toBe(hitCircle1); ++count; });
+    notHitCircle.on('hit', function(obj) { expect(true).toBe(false); });
+    var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
+    detector.test();
+    detector.test();
+    expect(count).toBe(2);
+    done();
+  });
+
   it('saves isHit flag on every hit object', function(done) {
     var hitCircle1 = getCircle(0,0, 3),
         hitCircle2 = getCircle(4,0, 3),
@@ -379,27 +395,70 @@ describe(CollisionDetection, function() {
     done();
   });
 
-  it("saves isHit flat on polygons", function(done) {
-    var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
-        polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
-        detector = new CollisionDetection(polygon1, polygon2);
-    detector.test();
-    expect(polygon1.isHit).toBe(true);
-    expect(polygon2.isHit).toBe(true);
-    done();
+  describe("hit events on polygons", function() {
+    it("saves isHit flat on polygons", function(done) {
+      var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+          polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
+          detector = new CollisionDetection(polygon1, polygon2);
+      detector.test();
+      expect(polygon1.isHit).toBe(true);
+      expect(polygon2.isHit).toBe(true);
+      done();
+    });
+
+    it("emits hit event on polygons", function(done) {
+      var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+          polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
+          detector = new CollisionDetection(polygon1, polygon2),
+          count = 0;
+
+      polygon1.on('hit', function(obj) { expect(obj).toBe(polygon2); ++count; });
+      polygon2.on('hit', function(obj) { expect(obj).toBe(polygon1); ++count; });
+      detector.test();
+      expect(count).toBe(2);
+      done();
+    });
+
+    it("emits no leaveHit event on colliding polygons", function(done) {
+      var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+          polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0)),
+          polygon3 = getPolygon(new Vector(10,0), new Vector(10,2), new Vector(30,0));
+          detector = new CollisionDetection(polygon1, polygon2, polygon3),
+          count = 0;
+
+      polygon1.on('leaveHit', function(obj) { ++count; });
+      polygon2.on('leaveHit', function(obj) { ++count; });
+      detector.test();
+      expect(count).toBe(0);
+      done();
+    });
+
+    it("emits no leaveHit event on never colliding polygons", function(done) {
+      var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+          polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0)),
+          polygon3 = getPolygon(new Vector(10,0), new Vector(10,2), new Vector(30,0));
+          detector = new CollisionDetection(polygon1, polygon2, polygon3),
+          count = 0;
+
+      polygon3.on('leaveHit', function(obj) { expect(true).toBe(false); });
+      detector.test();
+      expect(count).toBe(0);
+      done();
+    });
+
+    it("emits no leaveHit event if two pairs of objects ", function(done) {
+      var rect1 = getRect(-10,0, -7,3),
+          rect2 = getRect(-12,2, -10,4),
+          polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+          polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
+      var detector = new CollisionDetection(rect1, rect2, polygon1, polygon2);
+      rect1.on('leaveHit', function(obj) { expect(true).toBe(false); });
+      rect2.on('leaveHit', function(obj) { expect(true).toBe(false); });
+      polygon1.on('leaveHit', function(obj) { expect(true).toBe(false); });
+      polygon2.on('leaveHit', function(obj) { expect(true).toBe(false); });
+      detector.test();
+      done();
+    });
+
   });
-
-  it("emits hit event on polygons", function(done) {
-    var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
-        polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
-        detector = new CollisionDetection(polygon1, polygon2),
-        count = 0;
-
-    polygon1.on('hit', function(obj) { expect(obj).toBe(polygon2); ++count; });
-    polygon2.on('hit', function(obj) { expect(obj).toBe(polygon1); ++count; });
-    detector.test();
-    expect(count).toBe(2);
-    done();
-  });
-
 });

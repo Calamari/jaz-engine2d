@@ -47,7 +47,7 @@ window.addEventListener('DOMContentLoaded', function() {
     context.stroke();
   };
 
-  var collisionDetection = new CollisionDetection(rect, rect2);
+  var collisionDetection = new CollisionDetection(rect, rect2, poly1, poly2);
 
   var render = function() {
     collisionDetection.test();

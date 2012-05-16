@@ -1,3 +1,35 @@
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 0) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
+}
 
 var Vector = Vector || require(__dirname + '/vector');
 var CollisionDetection = function() {
@@ -39,6 +71,9 @@ CollisionDetection.prototype.countElements = function() {
  */
 CollisionDetection.prototype.test = function() {
   var objects = this.objects,
+      // hitObjects = [],
+      previousHitObjects = [],
+      hitLeavingObjects = [],
       distance, i, j, obj1, obj2, isHit, p1, p2, isPolygonCheck;
   this.collisions = [];
   for (i=objects.length; i--;) {
@@ -46,41 +81,46 @@ CollisionDetection.prototype.test = function() {
       obj1 = objects[i];
       obj2 = objects[j];
       isHit = false;
+      p1 = obj1.position;
+      p2 = obj2.position;
       if (obj1.collisionType === 'circle' && obj2.collisionType === 'circle') {
-        distance = new Vector(obj1.position.x, obj1.position.y).distanceTo(new Vector(obj2.position.x, obj2.position.y));
+        distance = new Vector(p1.x, p1.y).distanceTo(new Vector(p2.x, p2.y));
         isHit = (distance < obj1.radius + obj2.radius);
-      } else {//if (obj1.collisionType === 'rectangle' && obj2.collisionType === 'rectangle') {
-        p1 = obj1.position;
-        p2 = obj2.position;
-        isPolygonCheck = obj1.collisionType === 'polygon' && obj2.collisionType === 'polygon';
-        if (isPolygonCheck) {
-          p1.clone().add(obj1.offset);
-          p2.clone().add(obj2.offset);
-        }
+      } else if (obj1.collisionType === 'rectangle' && obj2.collisionType === 'rectangle') {
         isHit = (p1.y + obj1.height >= p2.y)
              && (p1.y <= p2.y + obj2.height)
              && (p1.x + obj1.width >= p2.x)
              && (p1.x <= p2.x + obj2.width);
-        if (isHit && isPolygonCheck) {
-          isHit = this._checkPolygonCollision(obj1, obj2);
-        }
+      } else if (obj1.collisionType === 'polygon' && obj2.collisionType === 'polygon') {
+        isHit = this._checkPolygonCollision(obj1, obj2);
       }
+      obj1.isHit && previousHitObjects.push(obj1);
+      obj2.isHit && previousHitObjects.push(obj2);
       if (isHit) {
-        obj1.isHit = true;
-        obj1.emit('hit', obj2);
-        obj2.isHit = true;
-        obj2.emit('hit', obj1);
         this.collisions.push([obj1, obj2]);
       } else {
-        if (obj1.isHit) { // if it was hit
-          obj1.isHit = false;
-          obj1.emit('leaveHit');
-        }
-        if (obj2.isHit) { // if it was hit
-          obj2.isHit = false;
-          obj2.emit('leaveHit');
-        }
+        obj1.isHit && hitLeavingObjects.push(obj1);
+        obj2.isHit && hitLeavingObjects.push(obj2);
       }
+    }
+  }
+  // fire events and remove isHit flags if needed
+  for (i=this.collisions.length; i--;) {
+    obj1 = this.collisions[i][0];
+    obj2 = this.collisions[i][1];
+    obj1.isHit = true;
+    obj2.isHit = true;
+    if (previousHitObjects.indexOf(obj1) === -1) {
+      obj1.emit('hit', obj2);
+    }
+    if (previousHitObjects.indexOf(obj2) === -1) {
+      obj2.emit('hit', obj1);
+    }
+  }
+  for (i=hitLeavingObjects.length; i--;) {
+    if (hitLeavingObjects[i].isHit) {
+      hitLeavingObjects[i].emit('leaveHit');
+      hitLeavingObjects[i].isHit = false;
     }
   }
 };
@@ -91,7 +131,7 @@ CollisionDetection.prototype._checkPolygonCollision = function(obj1, obj2) {
       axis, i, l, projection1, projection2;
 
   for (i = 0, l=points1.length; i<l; ++i) {
-    axis = points1[i].clone().sub(points1[(i == points1.length-1 ? 0 : (i+1))]).rightNormal();
+    axis = points1[i].clone().sub(points1[(i == l-1 ? 0 : (i+1))]).rightNormal();
     projection1 = obj1.project(axis);
     projection2 = obj2.project(axis);
     if (!this._doProjectionsOverlap(projection1, projection2)) {
@@ -99,8 +139,8 @@ CollisionDetection.prototype._checkPolygonCollision = function(obj1, obj2) {
     }
   }
 
-  for (i = points2.length; i--; ) {
-    axis = points2[i].clone().sub(points2[(i == points2.length-1 ? 0 : (i+1))]).rightNormal();
+  for (i = 0, l=points2.length; i--; ) {
+    axis = points2[i].clone().sub(points2[(i == l-1 ? 0 : (i+1))]).rightNormal();
     projection1 = obj1.project(axis);
     projection2 = obj2.project(axis);
     if (!this._doProjectionsOverlap(projection1, projection2)) {
