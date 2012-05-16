@@ -16,6 +16,7 @@
     "connect": "~2.2",
     "connect-assets": "2.x",
     "findit": "~0.1",
+    "benchmark": "~0.3",
     "jasmine-node": "~1.0"
   },
   "devDependencies": {}
