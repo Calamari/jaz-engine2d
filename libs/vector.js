@@ -3,6 +3,8 @@
 /**
  *  An implementation of a vector
  * @TODO: fasten up with prototype
+ *
+ * benchmarks in: http://jsperf.com/vector2d
  */
 var Vector = function(x, y) {
   this.x = x ? x : 0;
