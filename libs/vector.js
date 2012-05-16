@@ -25,6 +25,7 @@ Vector.prototype.sub = function(v) {
   return this;
 };
 
+Vector.prototype.dot =
 Vector.prototype.dotProduct = function(v) {
   return this.x * v.x + this.y * v.y;
 };
@@ -49,6 +50,7 @@ Vector.prototype.length = function() {
   return this.distanceTo({ x: 0, y: 0 });
 };
 
+Vector.prototype.distanceFrom =
 Vector.prototype.distanceTo = function(v) {
   return Math.sqrt(Math.pow(this.x - v.x,2) + Math.pow(this.y - v.y,2));
 };
