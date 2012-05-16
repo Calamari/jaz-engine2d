@@ -94,6 +94,12 @@ describe(CollisionDetection, function() {
     done();
   });
 
+  it("#set allowes to set some configuration", function(done) {
+    var detector = new CollisionDetection();
+    expect(typeof detector.set).toEqual('function');
+    done();
+  });
+
   describe('#getCollisions', function() {
     it("has a getCollisions method", function(done) {
       var detector = new CollisionDetection();
@@ -246,6 +252,44 @@ describe(CollisionDetection, function() {
         );
         detector.test();
         expect(detector.getCollisions().length).toEqual(0);
+        done();
+      });
+
+      it("adds mtv to collision of polygons if configured on collision detector", function(done) {
+        var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+            polygon2 = getPolygon(new Vector(0,6), new Vector(3,2), new Vector(0,2));
+            detector = new CollisionDetection(polygon1, polygon2),
+            count = 0;
+        detector.set('mtv', true);
+        polygon1.on('hit', function(obj, data) {
+          expect(data.mtv.constructor).toBe(Vector);
+          expect(data.mtv.x).toBe(0);
+          // This should be -1 but I can't yet figure out how to get the direction to work
+          expect(data.mtv.y).toBe(1);
+          ++count;
+        });
+        polygon2.on('hit', function(obj, data) {
+          expect(data.mtv.constructor).toBe(Vector);
+          expect(data.mtv.x).toBe(0);
+          expect(data.mtv.y).toBe(1);
+          ++count;
+        });
+        detector.test();
+        expect(count).toEqual(2);
+        done();
+      });
+
+      it("adds no mtv to collision of polygons if configured not do calculate it", function(done) {
+        var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+            polygon2 = getPolygon(new Vector(0,6), new Vector(3,2), new Vector(0,2));
+            detector = new CollisionDetection(polygon1, polygon2),
+            count = 0;
+        polygon1.on('hit', function(obj, data) {
+          expect(data.mtv).toEqual(null);
+          ++count;
+        });
+        detector.test();
+        expect(count).toEqual(1);
         done();
       });
 

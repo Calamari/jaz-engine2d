@@ -2,8 +2,13 @@
 var Vector = Vector || require(__dirname + '/vector');
 var CollisionDetection = function() {
   this.objects = [];
+  this._config = { mtv: false };
   this.collisions = [];
   this.addObjects.apply(this, arguments);
+};
+
+CollisionDetection.prototype.set = function(config, value) {
+  this._config[config] = value;
 };
 
 CollisionDetection.prototype.add =
@@ -42,7 +47,7 @@ CollisionDetection.prototype.test = function() {
       // hitObjects = [],
       previousHitObjects = [],
       hitLeavingObjects = [],
-      distance, i, j, obj1, obj2, isHit, p1, p2, isPolygonCheck;
+      distance, i, j, obj1, obj2, isHit, p1, p2, isPolygonCheck, data;
   this.collisions = [];
   for (i=objects.length; i--;) {
     for (j=i; j--;) {
@@ -65,7 +70,11 @@ CollisionDetection.prototype.test = function() {
       obj1.isHit && previousHitObjects.push(obj1);
       obj2.isHit && previousHitObjects.push(obj2);
       if (isHit) {
-        this.collisions.push([obj1, obj2]);
+        if (this._config.mtv) {
+          this.collisions.push([obj1, obj2, isHit]);
+        } else {
+          this.collisions.push([obj1, obj2]);
+        }
       } else {
         obj1.isHit && hitLeavingObjects.push(obj1);
         obj2.isHit && hitLeavingObjects.push(obj2);
@@ -78,11 +87,18 @@ CollisionDetection.prototype.test = function() {
     obj2 = this.collisions[i][1];
     obj1.isHit = true;
     obj2.isHit = true;
+    data = {};
     if (previousHitObjects.indexOf(obj1) === -1) {
-      obj1.emit('hit', obj2);
+      if (this._config.mtv) {
+        data.mtv = this.collisions[i][2];
+      }
+      obj1.emit('hit', obj2, data);
     }
     if (previousHitObjects.indexOf(obj2) === -1) {
-      obj2.emit('hit', obj1);
+      if (this._config.mtv) {
+        data.mtv = this.collisions[i][2];
+      }
+      obj2.emit('hit', obj1, data);
     }
   }
   for (i=hitLeavingObjects.length; i--;) {
@@ -96,31 +112,63 @@ CollisionDetection.prototype.test = function() {
 CollisionDetection.prototype._checkPolygonCollision = function(obj1, obj2) {
   var points1 = obj1.points,
       points2 = obj2.points,
-      axis, i, l, projection1, projection2;
+      axis, smallestAxis, smallestOverlap = null, overlap,
+      i, l, projection1, projection2;
 
   for (i = 0, l=points1.length; i<l; ++i) {
     axis = points1[i].clone().sub(points1[(i == l-1 ? 0 : (i+1))]).rightNormal();
+    if (this._config.mtv) {
+      axis.normalize();
+    }
     projection1 = obj1.project(axis);
     projection2 = obj2.project(axis);
-    if (!this._doProjectionsOverlap(projection1, projection2)) {
+    overlap = this._doProjectionsOverlap(projection1, projection2);
+    if (overlap === false) {
       return false;
+    } else if (this._config.mtv) {
+      if (smallestOverlap === null || overlap < smallestOverlap) {
+        smallestOverlap = overlap;
+        smallestAxis = axis.clone();
+      }
     }
   }
 
-  for (i = 0, l=points2.length; i--; ) {
+  for (i = 0, l=points2.length; i<l; ++i ) {
     axis = points2[i].clone().sub(points2[(i == l-1 ? 0 : (i+1))]).rightNormal();
+    if (this._config.mtv) {
+      axis.normalize();
+    }
     projection1 = obj1.project(axis);
     projection2 = obj2.project(axis);
-    if (!this._doProjectionsOverlap(projection1, projection2)) {
+    overlap = this._doProjectionsOverlap(projection1, projection2);
+    if (overlap === false) {
       return false;
+    } else if (this._config.mtv) {
+      if (smallestOverlap === null || overlap < smallestOverlap) {
+        smallestOverlap = overlap;
+        smallestAxis = axis.clone();
+      }
     }
   }
-  return true;
+  if (this._config.mtv) {
+    return smallestAxis.normalize(smallestOverlap);
+  } else {
+    return true;
+  }
 };
 
 CollisionDetection.prototype._doProjectionsOverlap = function(projection1, projection2) {
-  return (projection1[0] <= projection2[1] && projection1[1] >= projection2[0])
-      || (projection2[0] <= projection1[1] && projection2[1] >= projection1[0]);
+  var max1 = projection1[1],
+      min1 = projection1[0],
+      max2 = projection2[1],
+      min2 = projection2[0],
+      doOverlap = (min1 <= max2 && min2 <= max1);
+
+  if (doOverlap && this._config.mtv) {
+    return max2 - min1;
+    return (min1 < min2) ? (max1 - min2) : (min1 - max2);
+  }
+  return doOverlap;
 };
 
 CollisionDetection.prototype.getCollisions = function() {
