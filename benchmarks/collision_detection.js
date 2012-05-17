@@ -2,9 +2,12 @@
 some resultes so far:
 
 1:
-  circle vs circle x 1,603 ops/sec ±0.43% (93 runs sampled)
-  AABB x 1,601 ops/sec ±0.82% (93 runs sampled)
-  SAT x 1,622 ops/sec ±0.38% (96 runs sampled)
+  circle vs circle x 1,492 ops/sec ±1.20% (87 runs sampled) (6 collisions)
+  AABB x 3,446 ops/sec ±0.60% (94 runs sampled) (1 collisions)
+  SAT x 65.97 ops/sec ±1.00% (65 runs sampled) (11 collisions)
+  SAT with circles x 125 ops/sec ±0.87% (76 runs sampled) (9 collisions)
+  SAT incl. MTV x 62.94 ops/sec ±0.62% (62 runs sampled) (11 collisions)
+  SAT with circles incl. MTV x 119 ops/sec ±0.78% (74 runs sampled) (9 collisions)
 */
 
 var Benchmark = require('benchmark');
@@ -39,13 +42,14 @@ var suite = new Benchmark.Suite(),
 
     rects = [],
     polygons = [],
-    circles = [];
+    circles = [],
+    polygonsAndCircles = [];
 
 for (var i =0; i<100; ++i) {
   rects.push(new Collidable.Rectangle({
     position: new Vector(Math.random() * 500, Math.random() * 500),
-    width: Math.random() * 100,
-    height: Math.random() * 100,
+    width: Math.random() * 20,
+    height: Math.random() * 20,
   }));
 }
 for (var i =0; i<100; ++i) {
@@ -60,24 +64,54 @@ for (var i =0; i<100; ++i) {
     radius: Math.random() * 10
   }));
 }
+for (var i =0; i<50; ++i) {
+  polygonsAndCircles.push(new Collidable.Polygon({
+    position: new Vector(Math.random() * 500, Math.random() * 500),
+    points: generateConvexPolygon(5 + Math.random() * 10, Math.round(5 + Math.random() * 10))
+  }));
+}
+for (var i =0; i<50; ++i) {
+  polygonsAndCircles.push(new Collidable.Circle({
+    position: new Vector(Math.random() * 500, Math.random() * 500),
+    radius: Math.random() * 10
+  }));
+}
 
 var DetectorCircles = new CollisionDetection(circles);
 var DetectorPolygons = new CollisionDetection(polygons);
 var DetectorRectangles = new CollisionDetection(rects);
+var DetectorPolygonsCircles = new CollisionDetection(polygonsAndCircles);
 
-
+var actualDetector;
 suite
 .add('circle vs circle', function() {
   DetectorCircles.test();
+  actualDetector = DetectorCircles;
 })
 .add('AABB', function() {
-  DetectorCircles.test();
+  DetectorRectangles.test();
+  actualDetector = DetectorRectangles;
 })
 .add('SAT', function() {
-  DetectorCircles.test();
+  DetectorPolygons.test();
+  actualDetector = DetectorPolygons;
+})
+.add('SAT with circles', function() {
+  DetectorPolygonsCircles.test();
+  actualDetector = DetectorPolygonsCircles;
+})
+.add('SAT incl. MTV', function() {
+  DetectorPolygons.test();
+  DetectorPolygons.set('mtv', true);
+  actualDetector = DetectorPolygons;
+})
+.add('SAT with circles incl. MTV', function() {
+  DetectorPolygonsCircles.test();
+  DetectorPolygonsCircles.set('mtv', true);
+  actualDetector = DetectorPolygonsCircles;
 })
 .on('cycle', function(event, bench) {
-  console.log(String(bench));
+  console.log(String(bench), '(' + actualDetector.getCollisions().length + ' collisions)');
 })
 .on('complete', function() {
   console.log('Fastest is ' + this.filter('fastest').pluck('name'));
