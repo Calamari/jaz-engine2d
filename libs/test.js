@@ -35,6 +35,10 @@ window.addEventListener('DOMContentLoaded', function() {
     position: new Vector(80, 300),
     points: [new Vector(0, 20), new Vector(40, 0), new Vector(0, 40)]
   });
+  window.circle1 = new Collidable.Circle({
+    position: new Vector(300, 100),
+    radius: 32
+  });
 
   var drawPolygon = function(poly) {
     context.strokeStyle = poly.isHit ? '#ff0000' : '#000000';
@@ -47,7 +51,7 @@ window.addEventListener('DOMContentLoaded', function() {
     context.stroke();
   };
 
-  var collisionDetection = new CollisionDetection(rect, rect2, poly1, poly2);
+  var collisionDetection = new CollisionDetection(rect, rect2, poly1, poly2, circle1);
 
   var render = function() {
     collisionDetection.test();
@@ -58,6 +62,11 @@ window.addEventListener('DOMContentLoaded', function() {
 
     context.strokeStyle = rect2.isHit ? '#ff0000' : '#000000';
     context.strokeRect(rect2.position.x, rect2.position.y, rect2.width, rect2.height);
+
+    context.strokeStyle = circle1.isHit ? '#ff0000' : '#000000';
+    context.beginPath();
+    context.arc(circle1.position.x, circle1.position.y, circle1.radius, 0, Math.PI*2, true);
+    context.stroke()
 
     drawPolygon(poly1);
     drawPolygon(poly2);
