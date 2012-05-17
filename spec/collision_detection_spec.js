@@ -288,6 +288,17 @@ describe(CollisionDetection, function() {
         done();
       });
 
+      it("finds collisions on polygons also with activated boundingBox check", function(done) {
+        var detector = new CollisionDetection(
+          getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+          getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0))
+        );
+        detector.set('boundingBoxes', true);
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(1);
+        done();
+      });
+
       it("can find no collisions if polygons only intersect in bounding box", function(done) {
         var detector = new CollisionDetection(
           getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),

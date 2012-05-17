@@ -47,25 +47,21 @@ CollisionDetection.prototype.test = function() {
       // hitObjects = [],
       previousHitObjects = [],
       hitLeavingObjects = [],
-      distance, i, j, obj1, obj2, isHit, p1, p2, isPolygonCheck, data;
+      distance, i, j, obj1, obj2, isHit, isPolygonCheck, data;
   this.collisions = [];
   for (i=objects.length; i--;) {
     for (j=i; j--;) {
       obj1 = objects[i];
       obj2 = objects[j];
       isHit = false;
-      p1 = obj1.position;
-      p2 = obj2.position;
       if (obj1.collisionType === 'circle' && obj2.collisionType === 'circle') {
-        distance = new Vector(p1.x, p1.y).distanceTo(new Vector(p2.x, p2.y));
+        distance = new Vector(obj1.position.x, obj1.position.y).distanceTo(new Vector(obj2.position.x, obj2.position.y));
         isHit = (distance < obj1.radius + obj2.radius);
       } else if (obj1.collisionType === 'rectangle' && obj2.collisionType === 'rectangle') {
-        isHit = (p1.y + obj1.height >= p2.y)
-             && (p1.y <= p2.y + obj2.height)
-             && (p1.x + obj1.width >= p2.x)
-             && (p1.x <= p2.x + obj2.width);
+        isHit = this._checkBoxCollision(obj1, obj2);
       } else if (obj1.collisionType === 'polygon' && obj2.collisionType === 'polygon') {
-        isHit = this._checkPolygonCollision(obj1, obj2);
+        isHit = this._config.boundingBoxes ? this._checkBoxCollision(obj1, obj2) : true;
+        isHit = isHit && this._checkPolygonCollision(obj1, obj2);
       } else if (obj1.collisionType === 'circle') {
         isHit = this._checkPolygonCircleCollision(obj2, obj1);
       } else if (obj2.collisionType === 'circle') {
@@ -111,6 +107,13 @@ CollisionDetection.prototype.test = function() {
       hitLeavingObjects[i].isHit = false;
     }
   }
+};
+
+CollisionDetection.prototype._checkBoxCollision = function(obj1, obj2) {
+  return (obj1.position.y + obj1.height >= obj2.position.y)
+     && (obj1.position.y <= obj2.position.y + obj2.height)
+     && (obj1.position.x + obj1.width >= obj2.position.x)
+     && (obj1.position.x <= obj2.position.x + obj2.width);
 };
 
 CollisionDetection.prototype._checkPolygonCircleCollision = function(obj1, circle) {
