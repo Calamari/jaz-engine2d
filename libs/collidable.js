@@ -37,8 +37,9 @@ Collidable.Circle.prototype = new Collidable;
  * Makes sense to project against a normal of some other edge or so
  */
 Collidable.Circle.prototype.project = function(axis) {
-  var pointOnAxis = axis.dot(this.position.clone());
-  return [pointOnAxis - this.radius, pointOnAxis + this.radius];
+  var pointOnAxis = axis.dot(this.position.clone()),
+      l = axis.length()*this.radius;
+  return [pointOnAxis - l, pointOnAxis + l];
 };
 
 
