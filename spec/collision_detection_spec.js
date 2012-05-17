@@ -214,6 +214,69 @@ describe(CollisionDetection, function() {
       });
     });
 
+
+    describe('between circles and rectangles', function() {
+      it("finds collisions", function(done) {
+        var detector = new CollisionDetection(getRect(0,0, 4,4), getCircle(6,2, 2.1));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(1);
+        done();
+      });
+
+      it("finds collisions of circle in bottom left", function(done) {
+        var detector = new CollisionDetection(getRect(0,0, 4,4), getCircle(-2,-2, 2.84));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(1);
+        done();
+      });
+
+      it("finds no collisions if not colliding", function(done) {
+        var detector = new CollisionDetection(getRect(0,0, 4,4), getCircle(6,2, 1.9));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(0);
+        done();
+      });
+
+      it("finds no collisions if not colliding but in widht area", function(done) {
+        var detector = new CollisionDetection(getRect(0,0, 4,4), getCircle(6,6, 2.1));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(0);
+        done();
+      });
+    });
+
+
+    describe('between circles and polygons', function() {
+      it("finds collisions", function(done) {
+        var detector = new CollisionDetection(getPolygon(new Vector(0,0), new Vector(4,2), new Vector(0,4)), getCircle(6,2, 2.1));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(1);
+        done();
+      });
+
+      it("finds collisions of circle in bottom left", function(done) {
+        var detector = new CollisionDetection(getPolygon(new Vector(0,0), new Vector(4,2), new Vector(0,4)), getCircle(-2,-2, 2.84));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(1);
+        done();
+      });
+
+      it("finds no collisions if not colliding", function(done) {
+        var detector = new CollisionDetection(getPolygon(new Vector(0,0), new Vector(4,2), new Vector(0,4)), getCircle(6,2, 1.9));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(0);
+        done();
+      });
+
+      it("finds no collisions if not colliding but in width area", function(done) {
+        var detector = new CollisionDetection(getPolygon(new Vector(0,0), new Vector(4,1.2), new Vector(0,4)), getCircle(6,2, 1.9));
+        detector.test();
+        expect(detector.getCollisions().length).toEqual(0);
+        done();
+      });
+    });
+
+
     describe('between polygons', function() {
       it("finds collisions on polygons", function(done) {
         var detector = new CollisionDetection(

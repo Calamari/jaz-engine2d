@@ -66,6 +66,10 @@ CollisionDetection.prototype.test = function() {
              && (p1.x <= p2.x + obj2.width);
       } else if (obj1.collisionType === 'polygon' && obj2.collisionType === 'polygon') {
         isHit = this._checkPolygonCollision(obj1, obj2);
+      } else if (obj1.collisionType === 'circle') {
+        isHit = this._checkPolygonCircleCollision(obj2, obj1);
+      } else if (obj2.collisionType === 'circle') {
+        isHit = this._checkPolygonCircleCollision(obj1, obj2);
       }
       obj1.isHit && previousHitObjects.push(obj1);
       obj2.isHit && previousHitObjects.push(obj2);
@@ -106,6 +110,62 @@ CollisionDetection.prototype.test = function() {
       hitLeavingObjects[i].emit('leaveHit');
       hitLeavingObjects[i].isHit = false;
     }
+  }
+};
+
+CollisionDetection.prototype._checkPolygonCircleCollision = function(obj1, circle) {
+  var points1 = obj1.points,
+      axis, smallestAxis, smallestOverlap = null, overlap,
+      distanceSquared, distanceVector, closestDistance = null,
+      i, projection1, projection2;
+
+  // check edges
+  for (i=0, l=points1.length; i<l; ++i) {
+    axis = points1[i].clone().sub(points1[(i == l-1 ? 0 : (i+1))]).rightNormal();
+    if (this._config.mtv) {
+      axis.normalize();
+    }
+    projection1 = obj1.project(axis);
+    projection2 = circle.project(axis);
+    overlap = this._getProjectionDistance(projection1, projection2);
+    if (overlap > 0) {
+      return false;
+    } else if (this._config.mtv) {
+      if (smallestOverlap === null || overlap < smallestOverlap) {
+        smallestOverlap = overlap;
+        smallestAxis = axis.clone();
+      }
+    }
+  }
+
+  // find vertex closest to circle and get the distance there
+  for (i=0, l=points1.length; i<l; ++i) {
+    distanceVector = points1[i].clone().sub(circle.position);
+    distanceSquared = distanceVector.x * distanceVector.x + distanceVector.y * distanceVector.y;
+
+    if (closestDistance === null || distanceSquared < closestDistance)
+    {
+      closestDistance = distanceSquared;
+      axis = distanceVector;
+    }
+  }
+  axis.rightNormal().normalize();
+  projection1 = obj1.project(axis);
+  projection2 = circle.project(axis);
+  overlap = this._getProjectionDistance(projection1, projection2);
+  if (overlap > 0) {
+    return false;
+  } else if (this._config.mtv) {
+    if (smallestOverlap === null || overlap < smallestOverlap) {
+      smallestOverlap = overlap;
+      smallestAxis = axis.clone();
+    }
+  }
+
+  if (this._config.mtv) {
+    return smallestAxis.normalize(smallestOverlap);
+  } else {
+    return true;
   }
 };
 
@@ -166,9 +226,17 @@ CollisionDetection.prototype._doProjectionsOverlap = function(projection1, proje
 
   if (doOverlap && this._config.mtv) {
     return max2 - min1;
-    return (min1 < min2) ? (max1 - min2) : (min1 - max2);
+    return (min1 < min2) ? (min2 - max1) : (min1 - max2);
   }
   return doOverlap;
+};
+CollisionDetection.prototype._getProjectionDistance = function(projection1, projection2) {
+  var max1 = projection1[1],
+      min1 = projection1[0],
+      max2 = projection2[1],
+      min2 = projection2[0];
+
+  return (min1 < min2) ? (min2 - max1) : (min1 - max2)
 };
 
 CollisionDetection.prototype.getCollisions = function() {
