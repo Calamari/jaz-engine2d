@@ -32,6 +32,16 @@ Collidable.Circle = function(config) {
 };
 Collidable.Circle.prototype = new Collidable;
 
+/**
+ * Projection projects edge against vector we give in to it
+ * Makes sense to project against a normal of some other edge or so
+ */
+Collidable.Circle.prototype.project = function(axis) {
+  var pointOnAxis = axis.dot(this.position.clone());
+  return [pointOnAxis - this.radius, pointOnAxis + this.radius];
+};
+
+
 Collidable.Polygon = function(config) {
   config = config || {};
   this.collisionType = 'polygon';

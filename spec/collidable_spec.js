@@ -95,6 +95,36 @@ describe(Collidable, function() {
       expect(obj.radius).toEqual(10);
       done();
     });
+
+    describe('#project', function() {
+      var obj = new Collidable.Circle({ position: new Vector(5,10), radius: 3 });
+      it("is a method", function(done) {
+        expect(typeof obj.project).toEqual('function');
+        done();
+      });
+
+      it("returns an Array with to number", function(done) {
+        var projection = obj.project(new Vector(1,0));
+        expect(projection.constructor).toEqual(Array);
+        expect(typeof projection[0]).toEqual('number');
+        expect(typeof projection[1]).toEqual('number');
+        done();
+      });
+
+      it("returns min 2 and max 8 if projected onto the x axis", function(done) {
+        var projection = obj.project(new Vector(1,0));
+        expect(projection[0]).toEqual(2);
+        expect(projection[1]).toEqual(8);
+        done();
+      });
+
+      it("returns min 7 and max 13 if projected onto the y axis", function(done) {
+        var projection = obj.project(new Vector(0,1));
+        expect(projection[0]).toEqual(7);
+        expect(projection[1]).toEqual(13);
+        done();
+      });
+    });
   });
 
   describe(Collidable.Polygon, function() {
