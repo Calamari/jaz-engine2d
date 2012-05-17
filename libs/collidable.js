@@ -14,9 +14,15 @@ Collidable.Rectangle = function(config) {
   this.position = config.position || new Vector();
   this.width = config.width || 0;
   this.height = config.height || 0;
+  this._calculatePoints();
 };
 
 Collidable.Rectangle.prototype = new Collidable;
+
+Collidable.Rectangle.prototype._calculatePoints = function() {
+  this.points = [new Vector(0,0), new Vector(this.width, 0), new Vector(this.width, this.height), new Vector(0, this.height)];
+};
+
 
 Collidable.Circle = function(config) {
   config = config || {};

@@ -52,6 +52,16 @@ describe(Collidable, function() {
       expect(obj.height).toEqual(14);
       done();
     });
+
+    it("has a set of points we can use in edge calculations", function(done) {
+      var obj = new Collidable.Rectangle({ position: new Vector(1,1), width: 12, height: 14 });
+      expect(obj.points.length).toEqual(4);
+      expect(obj.points[0]).toEqual(new Vector(0,0));
+      expect(obj.points[1]).toEqual(new Vector(12,0));
+      expect(obj.points[2]).toEqual(new Vector(12,14));
+      expect(obj.points[3]).toEqual(new Vector(0,14));
+      done();
+    });
   });
 
   describe(Collidable.Circle, function() {
