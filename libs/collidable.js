@@ -58,6 +58,7 @@ Collidable.Polygon.prototype = new Collidable;
  * Projection projects edge against vector we give in to it
  * Makes sense to project against a normal of some other edge or so
  */
+Collidable.Rectangle.prototype.project =
 Collidable.Polygon.prototype.project = function(axis) {
   var min = axis.dot(this.position.clone().add(this.points[0])),
       max = min,

@@ -2,6 +2,47 @@
 var Vector = require(__dirname + '/../libs/vector');
 var Collidable = require(__dirname + '/../libs/collidable');
 
+var behavesLikeProject = function(obj) {
+  describe('#project', function() {
+    it("is a method", function(done) {
+      expect(typeof obj.project).toEqual('function');
+      done();
+    });
+
+    it("returns an Array with to number", function(done) {
+      var projection = obj.project(new Vector(1,0));
+      expect(projection.constructor).toEqual(Array);
+      expect(typeof projection[0]).toEqual('number');
+      expect(typeof projection[1]).toEqual('number');
+      done();
+    });
+
+    it("returns min 0 and max 1 if projected onto the x axis", function(done) {
+      var projection = obj.project(new Vector(1,0));
+      expect(projection[0]).toEqual(0);
+      expect(projection[1]).toEqual(1);
+      done();
+    });
+
+    it("returns min 0 and max 2 if projected onto the y axis", function(done) {
+      var projection = obj.project(new Vector(0,1));
+      expect(projection[0]).toEqual(1);
+      expect(projection[1]).toEqual(3);
+      done();
+    });
+
+    it("includes obj position into projection calculation", function(done) {
+      obj.position.add(new Vector(1,2));
+      var projection = obj.project(new Vector(0,1));
+      expect(projection[0]).toEqual(3);
+      expect(projection[1]).toEqual(5);
+      done();
+    });
+  });
+};
+
+
+
 describe(Collidable, function() {
   it("Instance of abstract class Collidable has 'none' as collision type", function(done) {
     var obj = new Collidable();
@@ -62,6 +103,8 @@ describe(Collidable, function() {
       expect(obj.points[3]).toEqual(new Vector(0,14));
       done();
     });
+
+    behavesLikeProject(new Collidable.Rectangle({ position: new Vector(0,1), width: 1, height: 2 }));
   });
 
   describe(Collidable.Circle, function() {
@@ -158,43 +201,7 @@ describe(Collidable, function() {
       done();
     });
 
-    describe('#project', function() {
-      var obj = new Collidable.Polygon({ points: [ new Vector(0,1), new Vector(0,3), new Vector(1,2) ] });
-      it("is a method", function(done) {
-        expect(typeof obj.project).toEqual('function');
-        done();
-      });
-
-      it("returns an Array with to number", function(done) {
-        var projection = obj.project(new Vector(1,0));
-        expect(projection.constructor).toEqual(Array);
-        expect(typeof projection[0]).toEqual('number');
-        expect(typeof projection[1]).toEqual('number');
-        done();
-      });
-
-      it("returns min 0 and max 1 if projected onto the x axis", function(done) {
-        var projection = obj.project(new Vector(1,0));
-        expect(projection[0]).toEqual(0);
-        expect(projection[1]).toEqual(1);
-        done();
-      });
-
-      it("returns min 0 and max 2 if projected onto the y axis", function(done) {
-        var projection = obj.project(new Vector(0,1));
-        expect(projection[0]).toEqual(1);
-        expect(projection[1]).toEqual(3);
-        done();
-      });
-
-      it("includes obj position into projection calculation", function(done) {
-        obj.position.add(new Vector(1,2));
-        var projection = obj.project(new Vector(0,1));
-        expect(projection[0]).toEqual(3);
-        expect(projection[1]).toEqual(5);
-        done();
-      });
-    });
+    behavesLikeProject(new Collidable.Polygon({ points: [ new Vector(0,1), new Vector(0,3), new Vector(1,2) ] }));
 
     describe('#calculateBoundingBox', function() {
       var obj;
