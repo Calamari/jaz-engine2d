@@ -1,6 +1,7 @@
 
 var Vector = require(__dirname + '/../libs/vector');
 var Collidable = require(__dirname + '/../libs/collidable');
+var Projection = require(__dirname + '/../libs/projection');
 
 var behavesLikeProject = function(obj) {
   describe('#project', function() {
@@ -9,33 +10,33 @@ var behavesLikeProject = function(obj) {
       done();
     });
 
-    it("returns an Array with to number", function(done) {
+    it("returns a Projection", function(done) {
       var projection = obj.project(new Vector(1,0));
-      expect(projection.constructor).toEqual(Array);
-      expect(typeof projection[0]).toEqual('number');
-      expect(typeof projection[1]).toEqual('number');
+      expect(projection.constructor).toEqual(Projection);
+      expect(typeof projection.min).toEqual('number');
+      expect(typeof projection.max).toEqual('number');
       done();
     });
 
     it("returns min 0 and max 1 if projected onto the x axis", function(done) {
       var projection = obj.project(new Vector(1,0));
-      expect(projection[0]).toEqual(0);
-      expect(projection[1]).toEqual(1);
+      expect(projection.min).toEqual(0);
+      expect(projection.max).toEqual(1);
       done();
     });
 
     it("returns min 0 and max 2 if projected onto the y axis", function(done) {
       var projection = obj.project(new Vector(0,1));
-      expect(projection[0]).toEqual(1);
-      expect(projection[1]).toEqual(3);
+      expect(projection.min).toEqual(1);
+      expect(projection.max).toEqual(3);
       done();
     });
 
     it("includes obj position into projection calculation", function(done) {
       obj.position.add(new Vector(1,2));
       var projection = obj.project(new Vector(0,1));
-      expect(projection[0]).toEqual(3);
-      expect(projection[1]).toEqual(5);
+      expect(projection.min).toEqual(3);
+      expect(projection.max).toEqual(5);
       done();
     });
   });
@@ -146,25 +147,25 @@ describe(Collidable, function() {
         done();
       });
 
-      it("returns an Array with to number", function(done) {
+      it("returns a Projection", function(done) {
         var projection = obj.project(new Vector(1,0));
-        expect(projection.constructor).toEqual(Array);
-        expect(typeof projection[0]).toEqual('number');
-        expect(typeof projection[1]).toEqual('number');
+        expect(projection.constructor).toEqual(Projection);
+        expect(typeof projection.min).toEqual('number');
+        expect(typeof projection.max).toEqual('number');
         done();
       });
 
       it("returns min 2 and max 8 if projected onto the x axis", function(done) {
         var projection = obj.project(new Vector(1,0));
-        expect(projection[0]).toEqual(2);
-        expect(projection[1]).toEqual(8);
+        expect(projection.min).toEqual(2);
+        expect(projection.max).toEqual(8);
         done();
       });
 
       it("returns min 7 and max 13 if projected onto the y axis", function(done) {
         var projection = obj.project(new Vector(0,1));
-        expect(projection[0]).toEqual(7);
-        expect(projection[1]).toEqual(13);
+        expect(projection.min).toEqual(7);
+        expect(projection.max).toEqual(13);
         done();
       });
     });

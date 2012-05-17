@@ -1,6 +1,7 @@
 
 var Vector = Vector || require(__dirname + '/vector');
 var EventEmitter = EventEmitter || require('events').EventEmitter;
+var Projection = Projection || require(__dirname + '/projection');
 
 var Collidable = function() {
   this.collisionType = 'none'
@@ -39,7 +40,7 @@ Collidable.Circle.prototype = new Collidable;
 Collidable.Circle.prototype.project = function(axis) {
   var pointOnAxis = axis.dot(this.position.clone()),
       l = axis.length()*this.radius;
-  return [pointOnAxis - l, pointOnAxis + l];
+  return new Projection(pointOnAxis - l, pointOnAxis + l);
 };
 
 
@@ -72,7 +73,7 @@ Collidable.Polygon.prototype.project = function(axis) {
     min = Math.min(min, proj);
     max = Math.max(max, proj);
   }
-  return [min, max];
+  return new Projection(min, max);
 };
 
 Collidable.Polygon.prototype.calculateBoundingBox = function() {
