@@ -328,13 +328,13 @@ describe(CollisionDetection, function() {
           expect(data.mtv.constructor).toBe(Vector);
           expect(data.mtv.x).toBe(0);
           // This should be -1 but I can't yet figure out how to get the direction to work
-          expect(data.mtv.y).toBe(1);
+          expect(data.mtv.y).toBe(-1);
           ++count;
         });
         polygon2.on('hit', function(obj, data) {
           expect(data.mtv.constructor).toBe(Vector);
           expect(data.mtv.x).toBe(0);
-          expect(data.mtv.y).toBe(1);
+          expect(data.mtv.y).toBe(-1);
           ++count;
         });
         detector.test();

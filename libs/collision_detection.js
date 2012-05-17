@@ -156,7 +156,7 @@ CollisionDetection.prototype._checkPolygonCircleCollision = function(obj1, circl
   if (overlap > 0) {
     return false;
   } else if (this._config.mtv) {
-    if (smallestOverlap === null || overlap < smallestOverlap) {
+    if (smallestOverlap === null || overlap > smallestOverlap) {
       smallestOverlap = overlap;
       smallestAxis = axis.clone();
     }
@@ -182,11 +182,11 @@ CollisionDetection.prototype._checkPolygonCollision = function(obj1, obj2) {
     }
     projection1 = obj1.project(axis);
     projection2 = obj2.project(axis);
-    overlap = this._doProjectionsOverlap(projection1, projection2);
-    if (overlap === false) {
+    overlap = this._getProjectionDistance(projection1, projection2);
+    if (overlap > 0) {
       return false;
     } else if (this._config.mtv) {
-      if (smallestOverlap === null || overlap < smallestOverlap) {
+      if (smallestOverlap === null || overlap > smallestOverlap) {
         smallestOverlap = overlap;
         smallestAxis = axis.clone();
       }
@@ -200,16 +200,17 @@ CollisionDetection.prototype._checkPolygonCollision = function(obj1, obj2) {
     }
     projection1 = obj1.project(axis);
     projection2 = obj2.project(axis);
-    overlap = this._doProjectionsOverlap(projection1, projection2);
-    if (overlap === false) {
+    overlap = this._getProjectionDistance(projection1, projection2);
+    if (overlap > 0) {
       return false;
     } else if (this._config.mtv) {
-      if (smallestOverlap === null || overlap < smallestOverlap) {
+      if (smallestOverlap === null || overlap > smallestOverlap) {
         smallestOverlap = overlap;
         smallestAxis = axis.clone();
       }
     }
   }
+
   if (this._config.mtv) {
     return smallestAxis.normalize(smallestOverlap);
   } else {
@@ -217,19 +218,6 @@ CollisionDetection.prototype._checkPolygonCollision = function(obj1, obj2) {
   }
 };
 
-CollisionDetection.prototype._doProjectionsOverlap = function(projection1, projection2) {
-  var max1 = projection1[1],
-      min1 = projection1[0],
-      max2 = projection2[1],
-      min2 = projection2[0],
-      doOverlap = (min1 <= max2 && min2 <= max1);
-
-  if (doOverlap && this._config.mtv) {
-    return max2 - min1;
-    return (min1 < min2) ? (min2 - max1) : (min1 - max2);
-  }
-  return doOverlap;
-};
 CollisionDetection.prototype._getProjectionDistance = function(projection1, projection2) {
   var max1 = projection1[1],
       min1 = projection1[0],
