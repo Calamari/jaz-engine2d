@@ -26,7 +26,7 @@ var getPolygon = function() {
   return poly;
 };
 
-describe(CollisionDetection, function() {
+describe("CollisionDetection", function() {
   it("can be instantiated", function(done) {
     var detector = new CollisionDetection();
     expect(detector.constructor).toEqual(CollisionDetection);

@@ -44,14 +44,14 @@ var behavesLikeProject = function(obj) {
 
 
 
-describe(Collidable, function() {
+describe("Collidable", function() {
   it("Instance of abstract class Collidable has 'none' as collision type", function(done) {
     var obj = new Collidable();
     expect(obj.collisionType).toEqual('none');
     done();
   });
 
-  describe(Collidable.Rectangle, function() {
+  describe("Collidable.Rectangle", function() {
     it("has 'rectangle' as collision type", function(done) {
       var obj = new Collidable.Rectangle();
       expect(obj.collisionType).toEqual('rectangle');
@@ -108,7 +108,7 @@ describe(Collidable, function() {
     behavesLikeProject(new Collidable.Rectangle({ position: new Vector(0,1), width: 1, height: 2 }));
   });
 
-  describe(Collidable.Circle, function() {
+  describe("Collidable.Circle", function() {
     it("has 'circle' as collision type", function(done) {
       var obj = new Collidable.Circle();
       expect(obj.collisionType).toEqual('circle');
@@ -171,7 +171,7 @@ describe(Collidable, function() {
     });
   });
 
-  describe(Collidable.Polygon, function() {
+  describe("Collidable.Polygon", function() {
     it("has 'polygon' as collision type", function(done) {
       var obj = new Collidable.Polygon();
       expect(obj.collisionType).toEqual('polygon');
