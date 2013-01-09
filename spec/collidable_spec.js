@@ -51,6 +51,20 @@ describe("Collidable", function() {
     done();
   });
 
+  describe("ids", function() {
+    it("to be there", function(done) {
+      expect(new Collidable().id).toBeTruthy();
+      done();
+    });
+
+    it("do never repeat themselves", function(done) {
+      var obj1 = new Collidable(),
+          obj2 = new Collidable();
+      expect(obj1.id).not.toEqual(obj2.id);
+      done();
+    });
+  });
+
   describe("Collidable.Rectangle", function() {
     it("has 'rectangle' as collision type", function(done) {
       var obj = new Collidable.Rectangle();

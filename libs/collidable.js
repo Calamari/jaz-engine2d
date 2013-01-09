@@ -2,9 +2,11 @@
 var Vector = Vector || require(__dirname + '/vector');
 var EventEmitter = EventEmitter || require('events').EventEmitter;
 var Projection = Projection || require(__dirname + '/projection');
+var nextCollidableId = 1;
 
 var Collidable = function() {
   this.collisionType = 'none'
+  this.id = nextCollidableId++;
 };
 
 Collidable.prototype = new EventEmitter;
