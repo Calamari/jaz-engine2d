@@ -22,7 +22,6 @@ var getPolygon = function() {
   var poly = new Collidable.Polygon({
     points: [].slice.call(arguments)
   });
-  poly.calculateBoundingBox();
   return poly;
 };
 
@@ -138,9 +137,10 @@ describe("CollisionDetection", function() {
           circle2 = getCircle(4,0, 3),
           detector = new CollisionDetection(circle1, circle2);
       detector.test();
-      expect(detector.getCollisions()[0].length).toEqual(2);
+      expect(detector.getCollisions()[0].length).toEqual(3);
       expect(detector.getCollisions()[0]).toContain(circle1);
       expect(detector.getCollisions()[0]).toContain(circle2);
+      expect(detector.getCollisions()[0][2]).toBe(true);
       done();
     });
   });
@@ -478,23 +478,44 @@ describe("CollisionDetection", function() {
     done();
   });
 
-  it('emits leaveHit event on every object leaving hit modus', function(done) {
-    var hitCircle1 = getCircle(0,0, 3),
-        hitCircle2 = getCircle(4,0, 3),
-        notHitCircle = getCircle(14,0, 3),
-        count = 0;
+  describe("the leaveHit event", function() {
+    var hitCircle1, hitCircle2, notHitCircle, count, detector;
 
-    var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
-    detector.test();
+    beforeEach(function(done) {
+      hitCircle1 = getCircle(0,0, 3);
+      hitCircle2 = getCircle(4,0, 3);
+      notHitCircle = getCircle(14,0, 3);
+      detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
+      detector.test();
 
-    hitCircle2.position.x = 100;
-    hitCircle1.on('leaveHit', function(obj) { ++count; });
-    hitCircle2.on('leaveHit', function(obj) { ++count; });
-    notHitCircle.on('leaveHit', function(obj) { expect(true).toBe(false); });
+      hitCircle2.position.x = 100;
+      count = 0;
+      done();
+    });
 
-    detector.test();
-    expect(count).toBe(2);
-    done();
+    it("is not emitted on objects then have not hit anything before", function(done) {
+      notHitCircle.on('leaveHit', function(obj) { expect(true).toBe(false); });
+
+      detector.test();
+      done();
+    });
+
+    it("is emitted on every object leaving hit modus", function(done) {
+      hitCircle1.on('leaveHit', function(obj) { ++count; });
+      hitCircle2.on('leaveHit', function(obj) { ++count; });
+
+      detector.test();
+      expect(count).toBe(2);
+      done();
+    });
+
+    it("contains the object it does not collide anymore", function(done) {
+      hitCircle1.on('leaveHit', function(obj) { expect(obj).toBe(hitCircle2); });
+      hitCircle2.on('leaveHit', function(obj) { expect(obj).toBe(hitCircle1); });
+
+      detector.test();
+      done();
+    });
   });
 
   it('removes isHit flag on every object leaving hit modus', function(done) {
