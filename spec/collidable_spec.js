@@ -66,6 +66,11 @@ describe("Collidable", function() {
   });
 
   describe("Collidable.Rectangle", function() {
+    it("has an id", function(done) {
+      expect(new Collidable.Rectangle().id).toBeTruthy();
+      done();
+    });
+
     it("has 'rectangle' as collision type", function(done) {
       var obj = new Collidable.Rectangle();
       expect(obj.collisionType).toEqual('rectangle');
@@ -123,6 +128,11 @@ describe("Collidable", function() {
   });
 
   describe("Collidable.Circle", function() {
+    it("has an id", function(done) {
+      expect(new Collidable.Circle().id).toBeTruthy();
+      done();
+    });
+
     it("has 'circle' as collision type", function(done) {
       var obj = new Collidable.Circle();
       expect(obj.collisionType).toEqual('circle');
@@ -186,6 +196,18 @@ describe("Collidable", function() {
   });
 
   describe("Collidable.Polygon", function() {
+    it("has an id", function(done) {
+      expect(new Collidable.Polygon().id).toBeTruthy();
+      done();
+    });
+
+    it("and the ids do not repeat", function(done) {
+      var obj1 = new Collidable.Polygon(),
+          obj2 = new Collidable.Polygon();
+      expect(obj1.id).not.toEqual(obj2.id);
+      done();
+    });
+
     it("has 'polygon' as collision type", function(done) {
       var obj = new Collidable.Polygon();
       expect(obj.collisionType).toEqual('polygon');

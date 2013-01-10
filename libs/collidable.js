@@ -19,6 +19,7 @@ Collidable.Rectangle = function(config) {
   this.position = config.position || new Vector();
   this.width = config.width || 0;
   this.height = config.height || 0;
+  this.id = nextCollidableId++;
   this._calculatePoints();
 };
 
@@ -34,6 +35,7 @@ Collidable.Circle = function(config) {
   this.collisionType = 'circle';
   this.position = config.position || new Vector();
   this.radius = config.radius || 0;
+  this.id = nextCollidableId++;
 };
 Collidable.Circle.prototype = new Collidable;
 
@@ -55,6 +57,7 @@ Collidable.Polygon = function(config) {
   this.points = config.points || [];
   this.width = 0;
   this.height = 0;
+  this.id = nextCollidableId++;
   this.calculateBoundingBox();
 };
 
