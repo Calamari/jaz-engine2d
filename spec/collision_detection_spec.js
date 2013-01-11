@@ -335,14 +335,14 @@ describe("CollisionDetection", function() {
             detector = new CollisionDetection(polygon1, polygon2),
             count = 0;
         detector.set('mtv', true);
-        polygon1.on('hit', function(obj, data) {
+        polygon1.on('startHitting', function(obj, data) {
           expect(data.mtv.constructor).toBe(Vector);
           expect(data.mtv.x).toBe(0);
           // This should be -1 but I can't yet figure out how to get the direction to work
           expect(data.mtv.y).toBe(-1);
           ++count;
         });
-        polygon2.on('hit', function(obj, data) {
+        polygon2.on('startHitting', function(obj, data) {
           expect(data.mtv.constructor).toBe(Vector);
           expect(data.mtv.x).toBe(0);
           expect(data.mtv.y).toBe(-1);
@@ -358,7 +358,7 @@ describe("CollisionDetection", function() {
             polygon2 = getPolygon(new Vector(0,6), new Vector(3,2), new Vector(0,2));
             detector = new CollisionDetection(polygon1, polygon2),
             count = 0;
-        polygon1.on('hit', function(obj, data) {
+        polygon1.on('startHitting', function(obj, data) {
           expect(data.mtv).toEqual(null);
           ++count;
         });
@@ -434,6 +434,21 @@ describe("CollisionDetection", function() {
     });
   });
 
+  it('emits startHitting event on every hit object', function(done) {
+    var hitCircle1 = getCircle(0,0, 3),
+        hitCircle2 = getCircle(4,0, 3),
+        notHitCircle = getCircle(14,0, 3),
+        count = 0;
+
+    hitCircle1.on('startHitting', function(obj) { expect(obj).toBe(hitCircle2); ++count; });
+    hitCircle2.on('startHitting', function(obj) { expect(obj).toBe(hitCircle1); ++count; });
+    notHitCircle.on('startHitting', function(obj) { expect(true).toBe(false); });
+    var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
+    detector.test();
+    expect(count).toBe(2);
+    done();
+  });
+
   it('emits hit event on every hit object', function(done) {
     var hitCircle1 = getCircle(0,0, 3),
         hitCircle2 = getCircle(4,0, 3),
@@ -449,7 +464,23 @@ describe("CollisionDetection", function() {
     done();
   });
 
-  it('emits hit event only once on first hitting an object', function(done) {
+  it('emits startHitting event only once on first hitting an object', function(done) {
+    var hitCircle1 = getCircle(0,0, 3),
+        hitCircle2 = getCircle(4,0, 3),
+        notHitCircle = getCircle(14,0, 3),
+        count = 0;
+
+    hitCircle1.on('startHitting', function(obj) { expect(obj).toBe(hitCircle2); ++count; });
+    hitCircle2.on('startHitting', function(obj) { expect(obj).toBe(hitCircle1); ++count; });
+    notHitCircle.on('startHitting', function(obj) { expect(true).toBe(false); });
+    var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
+    detector.test();
+    detector.test();
+    expect(count).toBe(2);
+    done();
+  });
+
+  it('emits hit event every test run for every hitting object', function(done) {
     var hitCircle1 = getCircle(0,0, 3),
         hitCircle2 = getCircle(4,0, 3),
         notHitCircle = getCircle(14,0, 3),
@@ -461,7 +492,7 @@ describe("CollisionDetection", function() {
     var detector = new CollisionDetection(hitCircle1, hitCircle2, notHitCircle);
     detector.test();
     detector.test();
-    expect(count).toBe(2);
+    expect(count).toBe(4);
     done();
   });
 
@@ -531,7 +562,20 @@ describe("CollisionDetection", function() {
       done();
     });
 
-    it('all three fire a hit event', function(done) {
+    it('all three fire a startHitting event', function(done) {
+      var fired1, fired2, fired3;
+      hitCircle1.on('startHitting', function(obj) { fired1 = true; });
+      hitCircle2.on('startHitting', function(obj) { fired2 = true; });
+      hitCircle3.on('startHitting', function(obj) { fired3 = true; });
+
+      detector.test();
+      expect(fired1).toBeTruthy();
+      expect(fired2).toBeTruthy();
+      expect(fired3).toBeTruthy();
+      done();
+    });
+
+    it('and all three fire a hit event', function(done) {
       var fired1, fired2, fired3;
       hitCircle1.on('hit', function(obj) { fired1 = true; });
       hitCircle2.on('hit', function(obj) { fired2 = true; });
@@ -541,6 +585,19 @@ describe("CollisionDetection", function() {
       expect(fired1).toBeTruthy();
       expect(fired2).toBeTruthy();
       expect(fired3).toBeTruthy();
+      done();
+    });
+
+    it('they fire the startHitting event for each hitted object', function(done) {
+      var hasHit2, hasHit3;
+      hitCircle1.on('startHitting', function(obj) {
+        hasHit2 = hasHit2 || obj == hitCircle2;
+        hasHit3 = hasHit3 || obj == hitCircle3;
+      });
+
+      detector.test();
+      expect(hasHit2).toBeTruthy();
+      expect(hasHit3).toBeTruthy();
       done();
     });
 
@@ -567,6 +624,15 @@ describe("CollisionDetection", function() {
       it("the moved element does not fire hit event anymore", function(done) {
         hitCircle3.on('hit', function(obj) { expect(false).toBe(true); });
         detector.test();
+        done();
+      });
+
+
+      it("the other elements still fire hit events", function(done) {
+        hitCircle1.on('hit', function(obj) { ++count });
+        hitCircle2.on('hit', function(obj) { ++count });
+        detector.test();
+        expect(count).toBe(2);
         done();
       });
 
@@ -652,6 +718,19 @@ describe("CollisionDetection", function() {
       detector.test();
       expect(polygon1.isHit).toBe(true);
       expect(polygon2.isHit).toBe(true);
+      done();
+    });
+
+    it("emits startHitting event on polygons", function(done) {
+      var polygon1 = getPolygon(new Vector(0,0), new Vector(3,3), new Vector(0,3)),
+          polygon2 = getPolygon(new Vector(1,0), new Vector(1,2), new Vector(3,0));
+          detector = new CollisionDetection(polygon1, polygon2),
+          count = 0;
+
+      polygon1.on('startHitting', function(obj) { expect(obj).toBe(polygon2); ++count; });
+      polygon2.on('startHitting', function(obj) { expect(obj).toBe(polygon1); ++count; });
+      detector.test();
+      expect(count).toBe(2);
       done();
     });
 

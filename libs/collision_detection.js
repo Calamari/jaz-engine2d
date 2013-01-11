@@ -121,8 +121,9 @@ CollisionDetection.prototype.test = function() {
         data.mtv = hits[i].mtv;
       }
       if (!hitsLastTime || !hitsLastTime[hits[i].object.id]) {
-        obj.emit('hit', hits[i].object, data);
+        obj.emit('startHitting', hits[i].object, data);
       }
+      obj.emit('hit', hits[i].object, data);
     }
   }
 
