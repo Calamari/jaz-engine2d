@@ -609,6 +609,22 @@ describe("CollisionDetection", function() {
         expect(passedAsArg2).toBeTruthy();
         done();
       });
+
+      it("the moved element fires stopHitting event", function(done) {
+        hitCircle3.on('stopHitting', function(obj) { ++count; });
+
+        detector.test();
+        expect(count).toBe(1);
+        done();
+      });
+
+      it("the both staying elements do not fire stopHitting event", function(done) {
+        hitCircle1.on('stopHitting', function(obj) { expect(false).toBe(true); });
+        hitCircle2.on('stopHitting', function(obj) { expect(false).toBe(true); });
+
+        detector.test();
+        done();
+      });
     });
   });
 

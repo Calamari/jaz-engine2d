@@ -138,10 +138,10 @@ CollisionDetection.prototype.test = function() {
       }
     }
 
-    // this means: it is completely hitfree:
+    // this means: it is completely hit free:
     if (!objectHits[id]) {
       obj.isHit = false;
-      obj.emit('hitfree', obj);
+      obj.emit('stopHitting', obj);
     }
   }
 
