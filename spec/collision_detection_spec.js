@@ -518,6 +518,100 @@ describe("CollisionDetection", function() {
     });
   });
 
+  describe('if three elements collide all with each other', function() {
+    var hitCircle1, hitCircle2, hitCircle3, count, detector;
+
+    beforeEach(function(done) {
+      hitCircle1 = getCircle(0,0, 3);
+      hitCircle2 = getCircle(1,0, 3);
+      hitCircle3 = getCircle(2,0, 3);
+      detector = new CollisionDetection(hitCircle1, hitCircle2, hitCircle3);
+
+      count = 0;
+      done();
+    });
+
+    it('all three fire a hit event', function(done) {
+      var fired1, fired2, fired3;
+      hitCircle1.on('hit', function(obj) { fired1 = true; });
+      hitCircle2.on('hit', function(obj) { fired2 = true; });
+      hitCircle3.on('hit', function(obj) { fired3 = true; });
+
+      detector.test();
+      expect(fired1).toBeTruthy();
+      expect(fired2).toBeTruthy();
+      expect(fired3).toBeTruthy();
+      done();
+    });
+
+    it('they fire the hit event for each hitted object', function(done) {
+      var hasHit2, hasHit3;
+      hitCircle1.on('hit', function(obj) {
+        hasHit2 = hasHit2 || obj == hitCircle2;
+        hasHit3 = hasHit3 || obj == hitCircle3;
+      });
+
+      detector.test();
+      expect(hasHit2).toBeTruthy();
+      expect(hasHit3).toBeTruthy();
+      done();
+    });
+
+    describe('and if one is not colliding anymore', function() {
+      beforeEach(function(done) {
+        detector.test();
+        hitCircle3.position.x = 100;
+        done();
+      });
+
+      it("the moved element does not fire hit event anymore", function(done) {
+        hitCircle3.on('hit', function(obj) { expect(false).toBe(true); });
+        detector.test();
+        done();
+      });
+
+      it("all elements fire leaveHit event (the moved element twice)", function(done) {
+        var fired1, fired2, fired3;
+        hitCircle1.on('leaveHit', function(obj) { fired1 = true; ++count; });
+        hitCircle2.on('leaveHit', function(obj) { fired2 = true; ++count; });
+        hitCircle3.on('leaveHit', function(obj) { fired3 = true; ++count; });
+        detector.test();
+
+        expect(fired1).toBeTruthy();
+        expect(fired2).toBeTruthy();
+        expect(fired3).toBeTruthy();
+        expect(count).toBe(4);
+        done();
+      });
+
+      it("both staying elements have the moved element as argument in leaveHit event", function(done) {
+        var passedIn1, passedIn2;
+        hitCircle1.on('leaveHit', function(obj) {
+          expect(obj).toBe(hitCircle3);
+        });
+        hitCircle2.on('leaveHit', function(obj) {
+          expect(obj).toBe(hitCircle3);
+        });
+
+        detector.test();
+        done();
+      });
+
+      it("moved element have the staying elements as arguments in leaveHit event", function(done) {
+        var passedAsArg1, passedAsArg2;
+        hitCircle3.on('leaveHit', function(obj) {
+          passedAsArg1 = passedAsArg1 || obj == hitCircle1;
+          passedAsArg2 = passedAsArg2 || obj == hitCircle2;
+        });
+
+        detector.test();
+        expect(passedAsArg1).toBeTruthy();
+        expect(passedAsArg2).toBeTruthy();
+        done();
+      });
+    });
+  });
+
   it('removes isHit flag on every object leaving hit modus', function(done) {
     var hitCircle1 = getCircle(0,0, 3),
         hitCircle2 = getCircle(4,0, 3),

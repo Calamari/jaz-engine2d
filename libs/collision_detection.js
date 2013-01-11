@@ -146,34 +146,6 @@ CollisionDetection.prototype.test = function() {
   }
 
   this._objectHitsLastTime = objectHits;
-
-  //old:
-/*  for (i=this.collisions.length; i--;) {
-    obj1 = this.collisions[i][0];
-    obj2 = this.collisions[i][1];
-    obj1.isHit = true;
-    obj2.isHit = true;
-    data = {};
-    if (previousHitObjects.indexOf(obj1) === -1) {
-      if (this._config.mtv) {
-        data.mtv = this.collisions[i][2];
-      }
-      obj1.emit('hit', obj2, data);
-    }
-    if (previousHitObjects.indexOf(obj2) === -1) {
-      if (this._config.mtv) {
-        data.mtv = this.collisions[i][2];
-      }
-      obj2.emit('hit', obj1, data);
-    }
-  }
-  for (i=hitLeavingObjects.length; i--;) {
-    if (hitLeavingObjects[i].isHit) {
-      hitLeavingObjects[i].emit('leaveHit');
-      hitLeavingObjects[i].isHit = false;
-    }
-  }
-*/
 };
 
 CollisionDetection.prototype._checkBoxCollision = function(obj1, obj2) {
