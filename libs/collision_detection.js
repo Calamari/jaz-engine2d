@@ -9,6 +9,9 @@ var CollisionDetection = function() {
   this.objects = []; // as array
   this._objects = {}; // as hash
 
+  // contains cache of objects that should be removed (outside a test run)
+  this._removedObjects = [];
+
   this.collisions = [];
 
   this._objectHitsLastTime = {};
@@ -37,13 +40,25 @@ CollisionDetection.prototype.addObjects = function() {
 // TODO: has to accept multiple items like add
 CollisionDetection.prototype.remove =
 CollisionDetection.prototype.removeObject = function(obj) {
-  for (var i=this.objects.length; i--;) {
-    if (this.objects[i] === obj) {
-      this.objects.splice(i, 1);
-      break;
-    }
+  this._removedObjects.push(obj);
+  if (!this._inTest) {
+    this._processRemovals();
   }
-  delete this._objects[obj.id];
+};
+
+CollisionDetection.prototype._processRemovals = function() {
+  var i,l,obj;
+  for (l=this._removedObjects.length; l--;) {
+    obj = this._removedObjects[l];
+    for (i=this.objects.length; i--;) {
+      if (this.objects[i] === obj) {
+        this.objects.splice(i, 1);
+        break;
+      }
+    }
+    delete this._objects[obj.id];
+  }
+  this._removedObjects = [];
 };
 
 CollisionDetection.prototype.countElements = function() {
@@ -74,6 +89,8 @@ CollisionDetection.prototype.test = function() {
     objectHits[obj1.id][obj2.id] = { object: obj2, mtv: mtv };
     objectHits[obj2.id][obj1.id] = { object: obj1, mtv: mtv };
   }
+
+  this._inTest = true;
 
   this.collisions = [];
   for (i=objects.length; i--;) {
@@ -147,6 +164,8 @@ CollisionDetection.prototype.test = function() {
   }
 
   this._objectHitsLastTime = objectHits;
+  this._inTest = false;
+  this._processRemovals();
 };
 
 CollisionDetection.prototype._checkBoxCollision = function(obj1, obj2) {

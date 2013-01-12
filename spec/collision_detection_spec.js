@@ -509,6 +509,53 @@ describe("CollisionDetection", function() {
     done();
   });
 
+  describe("if startHitting event removes the object from collision detection", function() {
+    var hitCircle1, hitCircle2, count, detector;
+
+    beforeEach(function(done) {
+      hitCircle1 = getCircle(0,0, 3);
+      hitCircle2 = getCircle(4,0, 3);
+      detector = new CollisionDetection(hitCircle1, hitCircle2);
+      hitCircle1.on('startHitting', function(obj) { detector.remove(hitCircle1); });
+
+      done();
+    });
+
+    it("hit event is still fired on that object", function(done) {
+      var count = 0;
+      hitCircle1.on('hit', function(obj) { ++count });
+      detector.test();
+      expect(count).toBe(1);
+      done();
+    });
+  });
+
+
+  describe("if leaveHit event of one object removes the other object from collision detection", function() {
+    var hitCircle1, hitCircle2, count, detector;
+
+    beforeEach(function(done) {
+      hitCircle1 = getCircle(0,0, 3);
+      hitCircle2 = getCircle(4,0, 3);
+      detector = new CollisionDetection(hitCircle1, hitCircle2);
+      detector.test();
+      hitCircle2.position.x = 100;
+      hitCircle1.on('leaveHit', function(obj) { detector.remove(obj); });
+      hitCircle2.on('leaveHit', function(obj) { detector.remove(obj); });
+
+      done();
+    });
+
+    it("leaveHit event is still fired on that other object", function(done) {
+      var count = 0;
+      hitCircle1.on('leaveHit', function(obj) { ++count; });
+      hitCircle2.on('leaveHit', function(obj) { ++count; });
+      detector.test();
+      expect(count).toBe(2);
+      done();
+    });
+  });
+
   describe("the leaveHit event", function() {
     var hitCircle1, hitCircle2, notHitCircle, count, detector;
 
