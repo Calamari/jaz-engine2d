@@ -57,6 +57,7 @@ CollisionDetection.prototype._processRemovals = function() {
       }
     }
     delete this._objects[obj.id];
+    delete this._objectHitsLastTime[obj.id];
   }
   this._removedObjects = [];
 };
@@ -151,7 +152,7 @@ CollisionDetection.prototype.test = function() {
 
     for (i in hits) {
       // so it has no hit this time with this object
-      if (!objectHits[id] || !objectHits[id][hits[i].object.id]) {
+      if ((!objectHits[id] || !objectHits[id][hits[i].object.id]) && this._objects[hits[i].object.id]) {
         obj.emit('leaveHit', hits[i].object);
       }
     }

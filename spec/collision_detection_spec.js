@@ -523,10 +523,30 @@ describe("CollisionDetection", function() {
 
     it("hit event is still fired on that object", function(done) {
       var count = 0;
-      hitCircle1.on('hit', function(obj) { ++count });
+      hitCircle1.on('hit', function(obj) { ++count; });
       detector.test();
       expect(count).toBe(1);
       done();
+    });
+
+    describe("on the next test run", function() {
+      beforeEach(function(done) {
+        detector.test();
+
+        done();
+      });
+
+      it("the removed object will not fire a leaveHit event", function(done) {
+        hitCircle1.on('leaveHit', function(obj) { expect(false).toBe(true); });
+        detector.test();
+        done();
+      });
+
+      it("the left object will not fire a leaveHit event with removed object", function(done) {
+        hitCircle2.on('leaveHit', function(obj) { expect(false).toBe(true); });
+        detector.test();
+        done();
+      });
     });
   });
 

@@ -2,7 +2,7 @@
   "author": "Georg Tavonius <g.tavonius@gmail.com> (http://jaz-lounge.com)",
   "name": "jaz-engine2d",
   "description": "A toolkit for 2D canvas games",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "http://games.jaz-lounge.com",
   "repository": {
     "url": ""
