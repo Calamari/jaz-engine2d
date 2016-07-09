@@ -11,6 +11,8 @@
     "node": "~0.8"
   },
   "dependencies": {
+  },
+  "devDependencies": {
     "express": "~2.5.1",
     "ejs": "~0.6",
     "connect": "~2.2",
@@ -19,6 +21,5 @@
     "benchmark": "~0.3",
     "microtime": "~0.3",
     "jasmine-node": "~1.0"
-  },
-  "devDependencies": {}
+  }
 }
